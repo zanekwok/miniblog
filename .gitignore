@@ -65,3 +65,5 @@ tags
 # Custom
 /_output
 /.idea
+/tmp
+.air.toml
