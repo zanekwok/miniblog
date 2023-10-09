@@ -10,6 +10,8 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/zanekwok/miniblog/internal/pkg/log"
+	"github.com/zanekwok/miniblog/pkg/version/verflag"
 )
 
 var cfgFile string
@@ -25,6 +27,11 @@ https://github.com/zanekwok/miniblog#readme`,
 		SilenceUsage: true,
 		// 指定调用 cmd.Execute() 时，执行的 Run 函数，函数执行失败会返回错误信息
 		RunE: func(cmd *cobra.Command, args []string) error {
+			// 如果 `--version=true`，则打印版本并退出
+			verflag.PrintAndExitIfRequested()
+			log.Init(logOptions())
+			defer log.Sync() // Sync 将缓存中的日志刷新到磁盘文件中
+
 			return run()
 		},
 		// 这里设置命令运行时，不需要指定命令行参数
@@ -46,6 +53,10 @@ https://github.com/zanekwok/miniblog#readme`,
 	cmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "The path to the miniblog configuration file. Empty string for no configuration file.")
 	// Cobra 也支持本地标志，本地标志只能在其所绑定的命令上使用
 	cmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
+	// 添加 --version 标志
+	verflag.AddFlags(cmd.PersistentFlags())
+
 	return cmd
 }
 
@@ -53,8 +64,8 @@ https://github.com/zanekwok/miniblog#readme`,
 func run() error {
 	// 打印所有的配置项及其值
 	settings, _ := json.Marshal(viper.AllSettings())
-	fmt.Println(string(settings))
+	log.Infow(string(settings))
 	// 打印 db -> username 配置项的值
-	fmt.Println(viper.GetString("db.username"))
+	log.Infow(viper.GetString("db.username"))
 	return nil
 }
