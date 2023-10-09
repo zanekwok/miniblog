@@ -7,6 +7,7 @@ package main
 
 import (
 	"github.com/zanekwok/miniblog/internal/miniblog"
+	_ "go.uber.org/automaxprocs/maxprocs"
 	"os"
 )
 
